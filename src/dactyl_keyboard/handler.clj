@@ -89,7 +89,10 @@
                                             "trrs" :trrs
                                             "rj9" :rj9
                                             "usb" :usb)
-        param-use-promicro-usb-hole       (parse-bool (get p "connector.micro-usb"))
+        param-usb-hole       (case (get p "connector.usb")
+                               "micro" :micro
+                               "mini" :mini
+                               "full" :full)
 
         param-hotswap                     (parse-bool (get p "form.hotswap"))
         param-stagger                     (parse-bool (get p "form.stagger"))
@@ -144,63 +147,65 @@
         generate-plate?                   (some? param-generate-plate)
         generate-json?                    (some? param-generate-json)
 
-        c                                 {:configuration-nrows                       param-nrows
-                                           :configuration-ncols                       param-ncols
-                                           :configuration-thumb-count                 param-thumb-count
-                                           :configuration-last-row-count              param-last-row-count
-                                           :configuration-switch-type                 param-switch-type
-                                           :configuration-inner-column                param-inner-column
-                                           :configuration-hide-last-pinky?            param-hide-last-pinky
+        config                            (fn [json?] {:configuration-nrows                       param-nrows
+                                                       :configuration-ncols                       param-ncols
+                                                       :configuration-thumb-count                 param-thumb-count
+                                                       :configuration-last-row-count              param-last-row-count
+                                                       :configuration-switch-type                 param-switch-type
+                                                       :configuration-inner-column                param-inner-column
+                                                       :configuration-hide-last-pinky?            param-hide-last-pinky
 
-                                           :configuration-alpha                       (if generate-json? param-alpha (/ pi param-alpha))
-                                           :configuration-pinky-alpha                 (if generate-json? param-pinky-alpha (/ pi param-pinky-alpha))
-                                           :configuration-beta                        (if generate-json? param-beta (/ pi param-beta))
-                                           :configuration-centercol                   param-centercol
-                                           :configuration-tenting-angle               (if generate-json? param-tenting-angle (/ pi param-tenting-angle))
-                                           :configuration-rotate-x-angle              (if generate-json? param-rotate-x-angle (/ pi param-rotate-x-angle))
-                                           :configuration-plate-projection?           generate-plate?
+                                                       :configuration-alpha                       (if json? param-alpha (/ pi param-alpha))
+                                                       :configuration-pinky-alpha                 (if json? param-pinky-alpha (/ pi param-pinky-alpha))
+                                                       :configuration-beta                        (if json? param-beta (/ pi param-beta))
+                                                       :configuration-centercol                   param-centercol
+                                                       :configuration-tenting-angle               (if json? param-tenting-angle (/ pi param-tenting-angle))
+                                                       :configuration-rotate-x-angle              (if json? param-rotate-x-angle (/ pi param-rotate-x-angle))
+                                                       :configuration-plate-projection?           generate-plate?
 
-                                           :configuration-use-external-holder?        param-use-external-holder
-                                           :configuration-connector-type              param-connector-type
-                                           :configuration-use-promicro-usb-hole?      param-use-promicro-usb-hole
+                                                       :configuration-use-external-holder?        param-use-external-holder
+                                                       :configuration-connector-type              param-connector-type
+                                                       :configuration-usb-hole                    param-usb-hole
 
-                                           :configuration-use-hotswap?                param-hotswap
-                                           :configuration-thumb-cluster-offset-x      param-thumb-cluster-offset-x
-                                           :configuration-thumb-cluster-offset-y      param-thumb-cluster-offset-y
-                                           :configuration-thumb-cluster-offset-z      param-thumb-cluster-offset-z
-                                           :configuration-custom-thumb-cluster?       param-custom-thumb-cluster
-                                           :configuration-thumb-top-right-offset-x    param-thumb-top-right-offset-x
-                                           :configuration-thumb-top-right-offset-y    param-thumb-top-right-offset-y
-                                           :configuration-thumb-top-right-offset-z    param-thumb-top-right-offset-z
-                                           :configuration-thumb-top-right-tenting-x   (if generate-json? param-thumb-top-right-tenting-x param-thumb-top-right-tenting-x)
-                                           :configuration-thumb-top-right-tenting-y   (if generate-json? param-thumb-top-right-tenting-y param-thumb-top-right-tenting-y)
-                                           :configuration-thumb-top-right-tenting-z   (if generate-json? param-thumb-top-right-tenting-z param-thumb-top-right-tenting-z)
-                                           :configuration-thumb-top-left-offset-x     param-thumb-top-left-offset-x
-                                           :configuration-thumb-top-left-offset-y     param-thumb-top-left-offset-y
-                                           :configuration-thumb-top-left-offset-z     param-thumb-top-left-offset-z
-                                           :configuration-thumb-top-left-tenting-x    (if generate-json? param-thumb-top-left-tenting-x param-thumb-top-left-tenting-x)
-                                           :configuration-thumb-top-left-tenting-y    (if generate-json? param-thumb-top-left-tenting-y param-thumb-top-left-tenting-y)
-                                           :configuration-thumb-top-left-tenting-z    (if generate-json? param-thumb-top-left-tenting-z param-thumb-top-left-tenting-z)
-                                           :configuration-thumb-middle-left-offset-x  param-thumb-middle-left-offset-x
-                                           :configuration-thumb-middle-left-offset-y  param-thumb-middle-left-offset-y
-                                           :configuration-thumb-middle-left-offset-z  param-thumb-middle-left-offset-z
-                                           :configuration-thumb-middle-left-tenting-x (if generate-json? param-thumb-middle-left-tenting-x param-thumb-middle-left-tenting-x)
-                                           :configuration-thumb-middle-left-tenting-y (if generate-json? param-thumb-middle-left-tenting-y param-thumb-middle-left-tenting-y)
-                                           :configuration-thumb-middle-left-tenting-z (if generate-json? param-thumb-middle-left-tenting-z param-thumb-middle-left-tenting-z)
-                                           :configuration-stagger?                    param-stagger
-                                           :configuration-stagger-index               stagger-index
-                                           :configuration-stagger-middle              stagger-middle
-                                           :configuration-stagger-ring                stagger-ring
-                                           :configuration-stagger-pinky               stagger-pinky
-                                           :configuration-z-offset                    param-keyboard-z-offset
-                                           :configuration-web-thickness               param-web-thickness
-                                           :configuration-wall-thickness              param-wall-thickness
-                                           :configuration-show-caps?                  param-show-keycaps
-                                           :configuration-use-wide-pinky?             param-wide-pinky
-                                           :configuration-use-wire-post?              param-wire-post
-                                           :configuration-use-screw-inserts?          param-screw-inserts
+                                                       :configuration-use-hotswap?                param-hotswap
+                                                       :configuration-thumb-cluster-offset-x      param-thumb-cluster-offset-x
+                                                       :configuration-thumb-cluster-offset-y      param-thumb-cluster-offset-y
+                                                       :configuration-thumb-cluster-offset-z      param-thumb-cluster-offset-z
+                                                       :configuration-custom-thumb-cluster?       param-custom-thumb-cluster
+                                                       :configuration-thumb-top-right-offset-x    param-thumb-top-right-offset-x
+                                                       :configuration-thumb-top-right-offset-y    param-thumb-top-right-offset-y
+                                                       :configuration-thumb-top-right-offset-z    param-thumb-top-right-offset-z
+                                                       :configuration-thumb-top-right-tenting-x   (if json? param-thumb-top-right-tenting-x param-thumb-top-right-tenting-x)
+                                                       :configuration-thumb-top-right-tenting-y   (if json? param-thumb-top-right-tenting-y param-thumb-top-right-tenting-y)
+                                                       :configuration-thumb-top-right-tenting-z   (if json? param-thumb-top-right-tenting-z param-thumb-top-right-tenting-z)
+                                                       :configuration-thumb-top-left-offset-x     param-thumb-top-left-offset-x
+                                                       :configuration-thumb-top-left-offset-y     param-thumb-top-left-offset-y
+                                                       :configuration-thumb-top-left-offset-z     param-thumb-top-left-offset-z
+                                                       :configuration-thumb-top-left-tenting-x    (if json? param-thumb-top-left-tenting-x param-thumb-top-left-tenting-x)
+                                                       :configuration-thumb-top-left-tenting-y    (if json? param-thumb-top-left-tenting-y param-thumb-top-left-tenting-y)
+                                                       :configuration-thumb-top-left-tenting-z    (if json? param-thumb-top-left-tenting-z param-thumb-top-left-tenting-z)
+                                                       :configuration-thumb-middle-left-offset-x  param-thumb-middle-left-offset-x
+                                                       :configuration-thumb-middle-left-offset-y  param-thumb-middle-left-offset-y
+                                                       :configuration-thumb-middle-left-offset-z  param-thumb-middle-left-offset-z
+                                                       :configuration-thumb-middle-left-tenting-x (if json? param-thumb-middle-left-tenting-x param-thumb-middle-left-tenting-x)
+                                                       :configuration-thumb-middle-left-tenting-y (if json? param-thumb-middle-left-tenting-y param-thumb-middle-left-tenting-y)
+                                                       :configuration-thumb-middle-left-tenting-z (if json? param-thumb-middle-left-tenting-z param-thumb-middle-left-tenting-z)
+                                                       :configuration-stagger?                    param-stagger
+                                                       :configuration-stagger-index               stagger-index
+                                                       :configuration-stagger-middle              stagger-middle
+                                                       :configuration-stagger-ring                stagger-ring
+                                                       :configuration-stagger-pinky               stagger-pinky
+                                                       :configuration-z-offset                    param-keyboard-z-offset
+                                                       :configuration-web-thickness               param-web-thickness
+                                                       :configuration-wall-thickness              param-wall-thickness
+                                                       :configuration-show-caps?                  param-show-keycaps
+                                                       :configuration-use-wide-pinky?             param-wide-pinky
+                                                       :configuration-use-wire-post?              param-wire-post
+                                                       :configuration-use-screw-inserts?          param-screw-inserts
 
-                                           :is-right?                                 is-right?}
+                                                       :is-right?                                 is-right?})
+        c                                 (config generate-json?)
+        c-json                            (config true)
         generated-file                    (cond
                                             generate-plate? {:file      (g/generate-plate-dm c is-right?)
                                                              :part      "plate"
@@ -214,8 +219,13 @@
         scad-file                         (get generated-file :file)
         part-name                         (get generated-file :part)
         date-time                         (current-time)
-        extension                         (get generated-file :extension)]
-    {:status  200
+        extension                         (get generated-file :extension)
+        _                                 (spit "things/left.scad" (g/generate-case-dm c false))
+        _                                 (spit "things/right.scad"  (g/generate-case-dm c true))
+        _                                 (spit "things/left-plate.scad" (g/generate-plate-dm c false))
+        _                                 (spit "things/right-plate.scad"  (g/generate-plate-dm c true))
+        _                                 (spit "things/manuform.json" (json/write-str (g/generate-json-dm c-json is-right?)))]
+    {:status  204
      :headers {"Content-Type"        "application/octet-stream"
                "Content-Disposition" (str "inline; filename=\"manuform-" part-name "-" date-time "." extension "\"")}
      :body    scad-file}))
@@ -352,7 +362,7 @@
 
                         :configuration-use-external-holder?        (get connector :external false)
                         :configuration-connector-type              (keyword (get connector :type "none"))
-                        :configuration-use-promicro-usb-hole?      (get connector :micro-usb false)
+                        :configuration-usb-hole                    (get connector :usb :micro)
 
                         :configuration-thumb-cluster-offset-x      (get form :thumb-cluster-offset-x 6)
                         :configuration-thumb-cluster-offset-y      (get form :thumb-cluster-offset-y -3)

@@ -10,7 +10,6 @@
 ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 ;(def keyboard-z-offset 4)
 
-
 ;; settings for column-style == :fixed 
 ;; the defaults roughly match maltron settings
 ;;   http://patentimages.storage.googleapis.com/ep0219944a2/imgf0002.png
@@ -63,10 +62,8 @@
   [beta centercol]
   (* beta (- centercol 2)))
 
-
 ; this is the function that puts the key switch holes
 ; based on the row and the column.
-
 
 (defn key-place
   "puts the keys' shape to its place based on it's column and row."
@@ -309,9 +306,8 @@
 
 (defn thumb-tenting [c default-rotation custom-rotation-key]
   (let [custom-tenting? (get c :configuration-custom-thumb-cluster?)
-        rotation (if custom-tenting? (get c custom-rotation-key default-rotation) default-rotation)
-        ]
-        (deg2rad rotation)))
+        rotation (if custom-tenting? (get c custom-rotation-key default-rotation) default-rotation)]
+    (deg2rad rotation)))
 
 (defn thumb-tl-place [c shape]
   (let [thumb-count     (get c :configuration-thumb-count)
@@ -374,8 +370,7 @@
                           [(get c :configuration-thumb-middle-left-offset-x)
                            (get c :configuration-thumb-middle-left-offset-y)
                            (get c :configuration-thumb-middle-left-offset-z)]
-                          [default-x default-y default-z])
-        ]
+                          [default-x default-y default-z])]
     (->> shape
          (rotate x-rotation [1 0 0])
          (rotate y-rotation [0 1 0])
@@ -455,7 +450,7 @@
                     (thumb-tl-place c shape)
                     (thumb-ml-place c shape))
       :five ()
-      :three-mini () 
+      :three-mini ()
       (union (thumb-tr-place c shape)
              (thumb-tl-place c shape)))))
 
@@ -881,21 +876,21 @@
                     f: the result of bottom-hull translation from wall-locate3"
   [c place1 dx1 dy1 post1 place2 dx2 dy2 post2]
   (let [wall-thickness (get c :configuration-wall-thickness)]
-  (union
-   (hull
-    (place1 post1)
-    (place1 (translate (wall-locate1 wall-thickness dx1 dy1) post1))
-    (place1 (translate (wall-locate2 wall-thickness dx1 dy1) post1))
-    (place1 (translate (wall-locate3 wall-thickness dx1 dy1) post1))
-    (place2 post2)
-    (place2 (translate (wall-locate1 wall-thickness dx2 dy2) post2))
-    (place2 (translate (wall-locate2 wall-thickness dx2 dy2) post2))
-    (place2 (translate (wall-locate3 wall-thickness dx2 dy2) post2)))
-   (bottom-hull
-    (place1 (translate (wall-locate2 wall-thickness dx1 dy1) post1))
-    (place1 (translate (wall-locate3 wall-thickness dx1 dy1) post1))
-    (place2 (translate (wall-locate2 wall-thickness dx2 dy2) post2))
-    (place2 (translate (wall-locate3 wall-thickness dx2 dy2) post2))))))
+    (union
+     (hull
+      (place1 post1)
+      (place1 (translate (wall-locate1 wall-thickness dx1 dy1) post1))
+      (place1 (translate (wall-locate2 wall-thickness dx1 dy1) post1))
+      (place1 (translate (wall-locate3 wall-thickness dx1 dy1) post1))
+      (place2 post2)
+      (place2 (translate (wall-locate1 wall-thickness dx2 dy2) post2))
+      (place2 (translate (wall-locate2 wall-thickness dx2 dy2) post2))
+      (place2 (translate (wall-locate3 wall-thickness dx2 dy2) post2)))
+     (bottom-hull
+      (place1 (translate (wall-locate2 wall-thickness dx1 dy1) post1))
+      (place1 (translate (wall-locate3 wall-thickness dx1 dy1) post1))
+      (place2 (translate (wall-locate2 wall-thickness dx2 dy2) post2))
+      (place2 (translate (wall-locate3 wall-thickness dx2 dy2) post2))))))
 
 (defn key-wall-brace [c x1 y1 dx1 dy1 post1 x2 y2 dx2 dy2 post2]
   (wall-brace c
@@ -1065,48 +1060,48 @@
 
 (defn thumb-wall-two [c]
   (let [web-thickness (get c :configuration-web-thickness)]
-  (union (wall-brace c
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness)
-                     (partial thumb-tl-place c)  0 -1 (thumb-post-br web-thickness))
-         (wall-brace c
-                     (partial thumb-tl-place c)  0 -1 (thumb-post-br web-thickness)
-                     (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness)
-                     (partial thumb-tl-place c) -1  0 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-tl-place c) -1  0 (thumb-post-bl web-thickness)
-                     (partial thumb-tl-place c) -1  0 (thumb-post-tl web-thickness)))))
+    (union (wall-brace c
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness)
+                       (partial thumb-tl-place c)  0 -1 (thumb-post-br web-thickness))
+           (wall-brace c
+                       (partial thumb-tl-place c)  0 -1 (thumb-post-br web-thickness)
+                       (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness)
+                       (partial thumb-tl-place c) -1  0 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-tl-place c) -1  0 (thumb-post-bl web-thickness)
+                       (partial thumb-tl-place c) -1  0 (thumb-post-tl web-thickness)))))
 
 (defn thumb-wall-three [c]
   (let [web-thickness (get c :configuration-web-thickness)]
-  (union (wall-brace c
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness)
-                     (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness)
-                     (partial thumb-ml-place c) -1 -1 (thumb-post-br web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c) -1 -1 (thumb-post-br web-thickness)
-                     (partial thumb-ml-place c)  0 -1 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c)  0 -1 (thumb-post-bl web-thickness)
-                     (partial thumb-ml-place c) -1  0 (thumb-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c) -1  0 (thumb-post-bl web-thickness)
-                     (partial thumb-ml-place c) -1  0 (thumb-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c) -1  0 (thumb-post-tl web-thickness)
-                     (partial thumb-ml-place c)  0  1 (thumb-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c)  0  1 (thumb-post-tr web-thickness)
-                     (partial thumb-ml-place c)  0  1 (thumb-post-tl web-thickness)))))
+    (union (wall-brace c
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-bl web-thickness)
+                       (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-tl-place c)  0 -1 (thumb-post-bl web-thickness)
+                       (partial thumb-ml-place c) -1 -1 (thumb-post-br web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c) -1 -1 (thumb-post-br web-thickness)
+                       (partial thumb-ml-place c)  0 -1 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c)  0 -1 (thumb-post-bl web-thickness)
+                       (partial thumb-ml-place c) -1  0 (thumb-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c) -1  0 (thumb-post-bl web-thickness)
+                       (partial thumb-ml-place c) -1  0 (thumb-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c) -1  0 (thumb-post-tl web-thickness)
+                       (partial thumb-ml-place c)  0  1 (thumb-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c)  0  1 (thumb-post-tr web-thickness)
+                       (partial thumb-ml-place c)  0  1 (thumb-post-tl web-thickness)))))
 
 (defn thumb-wall-three-mini [c]
   (let [web-thickness (get c :configuration-web-thickness)]
@@ -1140,30 +1135,30 @@
 
 (defn thumb-wall-four [c]
   (let [web-thickness (get c :configuration-web-thickness)]
-  (union (wall-brace c
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
-                     (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness))
-         (wall-brace c
-                     (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness)
-                     (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness)
-                     (partial thumb-mr-place c) -1  0 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-mr-place c) -1  0 (web-post-bl web-thickness)
-                     (partial thumb-mr-place c) -1  0 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-mr-place c) -1  0 (web-post-tl web-thickness)
-                     (partial thumb-ml-place c) -1  0 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c) -1  0 (web-post-bl web-thickness)
-                     (partial thumb-ml-place c) -1  0 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c) -1  0 (web-post-tl web-thickness)
-                     (partial thumb-ml-place c)  0  1 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c)  0  1 (web-post-tl web-thickness)
-                     (partial thumb-ml-place c)  0  1 (web-post-tr web-thickness)))))
+    (union (wall-brace c
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
+                       (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness))
+           (wall-brace c
+                       (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness)
+                       (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness)
+                       (partial thumb-mr-place c) -1  0 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-mr-place c) -1  0 (web-post-bl web-thickness)
+                       (partial thumb-mr-place c) -1  0 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-mr-place c) -1  0 (web-post-tl web-thickness)
+                       (partial thumb-ml-place c) -1  0 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c) -1  0 (web-post-bl web-thickness)
+                       (partial thumb-ml-place c) -1  0 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c) -1  0 (web-post-tl web-thickness)
+                       (partial thumb-ml-place c)  0  1 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c)  0  1 (web-post-tl web-thickness)
+                       (partial thumb-ml-place c)  0  1 (web-post-tr web-thickness)))))
 
 (defn thumb-wall-five [c]
   (let [web-thickness (get c :configuration-web-thickness)]
@@ -1200,42 +1195,42 @@
 
 (defn thumb-wall-six [c]
   (let [web-thickness (get c :configuration-web-thickness)]
-  (union (wall-brace c
-                     (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
-                     (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness))
-         (wall-brace c
-                     (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness)
-                     (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness)
-                     (partial thumb-br-place c)  0 -1 (web-post-br web-thickness))
-         (wall-brace c
-                     (partial thumb-br-place c)  0 -1 (web-post-br web-thickness)
-                     (partial thumb-br-place c)  0 -1 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-br-place c)  0 -1 (web-post-bl web-thickness)
-                     (partial thumb-br-place c) -1  0 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-br-place c) -1  0 (web-post-bl web-thickness)
-                     (partial thumb-br-place c) -1  0 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-br-place c) -1  0 (web-post-tl web-thickness)
-                     (partial thumb-bl-place c) -1  0 (web-post-bl web-thickness))
-         (wall-brace c
-                     (partial thumb-bl-place c) -1  0 (web-post-bl web-thickness)
-                     (partial thumb-bl-place c) -1  0 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-bl-place c) -1  0 (web-post-tl web-thickness)
-                     (partial thumb-bl-place c)  0  1 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-bl-place c)  0  1 (web-post-tl web-thickness)
-                     (partial thumb-bl-place c) -1.1  1 (web-post-tr web-thickness))
-         (wall-brace c
-                     (partial thumb-bl-place c) -1.1  1 (web-post-tr web-thickness)
-                     (partial thumb-ml-place c) -1.1  1 (web-post-tl web-thickness))
-         (wall-brace c
-                     (partial thumb-ml-place c) -1.1  1 (web-post-tl web-thickness)
-                     (partial thumb-ml-place c)  0  1 (web-post-tr web-thickness)))))
+    (union (wall-brace c
+                       (partial thumb-tr-place c)  0 -1 (thumb-post-br web-thickness)
+                       (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness))
+           (wall-brace c
+                       (partial thumb-mr-place c)  0 -1 (web-post-br web-thickness)
+                       (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-mr-place c)  0 -1 (web-post-bl web-thickness)
+                       (partial thumb-br-place c)  0 -1 (web-post-br web-thickness))
+           (wall-brace c
+                       (partial thumb-br-place c)  0 -1 (web-post-br web-thickness)
+                       (partial thumb-br-place c)  0 -1 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-br-place c)  0 -1 (web-post-bl web-thickness)
+                       (partial thumb-br-place c) -1  0 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-br-place c) -1  0 (web-post-bl web-thickness)
+                       (partial thumb-br-place c) -1  0 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-br-place c) -1  0 (web-post-tl web-thickness)
+                       (partial thumb-bl-place c) -1  0 (web-post-bl web-thickness))
+           (wall-brace c
+                       (partial thumb-bl-place c) -1  0 (web-post-bl web-thickness)
+                       (partial thumb-bl-place c) -1  0 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-bl-place c) -1  0 (web-post-tl web-thickness)
+                       (partial thumb-bl-place c)  0  1 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-bl-place c)  0  1 (web-post-tl web-thickness)
+                       (partial thumb-bl-place c) -1.1  1 (web-post-tr web-thickness))
+           (wall-brace c
+                       (partial thumb-bl-place c) -1.1  1 (web-post-tr web-thickness)
+                       (partial thumb-ml-place c) -1.1  1 (web-post-tl web-thickness))
+           (wall-brace c
+                       (partial thumb-ml-place c) -1.1  1 (web-post-tl web-thickness)
+                       (partial thumb-ml-place c)  0  1 (web-post-tr web-thickness)))))
 
 (defn thumb-wall [c]
   (let [thumb-count (get c :configuration-thumb-count)]
@@ -1428,7 +1423,7 @@
 
 (defn pro-micro-position [c]
   (let [wall-thickness (get c :configuration-wall-thickness)]
-  (map + (key-position c 0 0.15 (wall-locate3 wall-thickness -1 0)) [-2 2 -30])))
+    (map + (key-position c 0 0.15 (wall-locate3 wall-thickness -1 0)) [-2 2 -30])))
 (def pro-micro-space-size [4 10 12]) ; z has no wall;
 (def pro-micro-wall-thickness 2)
 (def pro-micro-holder-size
@@ -1463,10 +1458,10 @@
 (def teensy-holder-top-length 18)
 (defn teensy-top-xy [c]
   (let [wall-thickness (get c :configuration-wall-thickness)]
-  (key-position c 0 (- (fcenterrow (get c :configuration-nrows)) 1) (wall-locate3 wall-thickness -1 0))))
+    (key-position c 0 (- (fcenterrow (get c :configuration-nrows)) 1) (wall-locate3 wall-thickness -1 0))))
 (defn teensy-bot-xy [c]
   (let [wall-thickness (get c :configuration-wall-thickness)]
-  (key-position c 0 (+ (fcenterrow (get c :configuration-nrows)) 1) (wall-locate3 wall-thickness -1 0))))
+    (key-position c 0 (+ (fcenterrow (get c :configuration-nrows)) 1) (wall-locate3 wall-thickness -1 0))))
 (defn teensy-holder-length [c]
   (- (second (teensy-top-xy c)) (second (teensy-bot-xy c))))
 (defn teensy-holder-offset [c]
@@ -1507,7 +1502,7 @@
 ; Cutout for controller/trrs jack external holder
 (defn external-holder-ref [c]
   (let [wall-thickness (get c :configuration-wall-thickness)]
-  (key-position c 0 0 (map - (wall-locate2 wall-thickness 0  -1) [0 (/ mount-height 2) 0]))))
+    (key-position c 0 0 (map - (wall-locate2 wall-thickness 0  -1) [0 (/ mount-height 2) 0]))))
 (defn external-holder-position [c]
   (map + [(+ 18.8 (external-holder-offset c)) 18.7 1.3] [(first (external-holder-ref c)) (second (external-holder-ref c)) 2]))
 (def external-holder-cube
@@ -1544,7 +1539,7 @@
 (def wire-post-height 7)
 (def wire-post-overhang 3.5)
 (def wire-post-diameter 2.6)
-(def usb-holder-offset [-22 5 0])
+; (def usb-holder-offset [-22 5 0])
 (defn wire-post [c direction offset]
   (->> (union (translate [0 (* wire-post-diameter -0.5 direction) 0]
                          (cube wire-post-diameter wire-post-diameter wire-post-height))
@@ -1569,7 +1564,7 @@
 (defn model-right [c]
   (let [show-caps?             (get c :configuration-show-caps?)
         use-external-holder?   (get c :configuration-use-external-holder?)
-        use-promicro-usb-hole? (get c :configuration-use-promicro-usb-hole?)
+        use-promicro-usb-hole? (get c :configuration-usb-hole)
         use-screw-inserts?     (get c :configuration-use-screw-inserts?)
         connector-type         (get c :configuration-connector-type)
         use-wire-post?         (get c :configuration-use-wire-post?)]
@@ -1653,7 +1648,7 @@
         :configuration-tenting-angle            (/ pi 12)
         :configuration-rotate-x-angle           (/ pi 180)
 
-        :configuration-use-promicro-usb-hole?   false
+        :configuration-usb-hole                 :micro
         :configuration-connector-type           :rj9
         :configuration-use-external-holder?     false
 
@@ -1684,24 +1679,24 @@
         :configuration-show-caps?               false
         :configuration-plate-projection?        false})
 
-#_(spit "things/right.scad"
-      (write-scad (model-right c)))
+; (spit "things/right.scad"
+;       (write-scad (model-right c)))
 
-#_(spit "things/right-plate.scad"
-        (write-scad (plate-right c)))
+; (spit "things/right-plate.scad"
+;       (write-scad (plate-right c)))
 
-#_(spit "things/right-plate.scad"
-        (write-scad
-         (cut
-          (translate [0 0 -0.1]
-                     (difference (union case-walls
-                                        teensy-holder
-                                          ; rj9-holder
-                                        screw-insert-outers)
-                                 (translate [0 0 -10] screw-insert-screw-holes))))))
+; (spit "things/right-plate.scad"
+;       (write-scad
+;        (cut
+;         (translate [0 0 -0.1]
+;                    (difference (union case-walls
+;                                       teensy-holder
+;                                           ; rj9-holder
+;                                       screw-insert-outers)
+;                                (translate [0 0 -10] screw-insert-screw-holes))))))
 
-#_(spit "things/left.scad"
-        (write-scad (mirror [-1 0 0] model-right)))
+; (spit "things/left.scad"
+;       (write-scad (mirror [-1 0 0] model-right)))
 
 #_(spit "things/right-test.scad"
         (write-scad

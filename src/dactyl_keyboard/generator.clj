@@ -30,7 +30,7 @@
                  :rotate-x     (get confs :configuration-rotate-x-angle)}
      :connector {:external  (get confs :configuration-use-external-holder?)
                  :type      (get confs :configuration-connector-type)
-                 :micro-usb (get confs :configuration-use-promicro-usb-hole?)}
+                 :usb       (get confs :configuration-usb-hole)}
      :form      {:hotswap          (get confs :configuration-use-hotswap?)
                  :thumb-cluster-offset-x   (get confs :configuration-thumb-cluster-offset-x)
                  :thumb-cluster-offset-y   (get confs :configuration-thumb-cluster-offset-y)

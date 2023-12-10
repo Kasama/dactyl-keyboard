@@ -233,9 +233,9 @@
                               :mx true
                               :mx-snap-in true
                               false) #_(get c :configuration-create-side-nub?)
-      nub-height           (case switch-type
-                              :mx-snap-in 0.75
-                              0) 
+        nub-height           (case switch-type
+                               :mx-snap-in 0.75
+                               0)
         use-alps?           (case switch-type
                               :alps true
                               false) #_(get c :configuration-use-alps?)
@@ -324,22 +324,20 @@
         choc-socket-holder-height 5.5
         choc-socket-holder-thickness 1
         choc-hotswap-socket-holder (difference
-                                (->> (cube 10 7 choc-socket-holder-height)
-                                     (translate [2 5 hotswap-base-z-offset]))
-                                (->> (cube 5 7 choc-socket-holder-height)
-                                     (translate [-0.6 6 (+ hotswap-base-z-offset choc-socket-holder-thickness)]))
-                                (->> (cube 7 7 choc-socket-holder-height)
-                                     (translate [5 4 (+ hotswap-base-z-offset choc-socket-holder-thickness)]))
-                                )
+                                    (->> (cube 10 7 choc-socket-holder-height)
+                                         (translate [2 5 hotswap-base-z-offset]))
+                                    (->> (cube 5 7 choc-socket-holder-height)
+                                         (translate [-0.6 6 (+ hotswap-base-z-offset choc-socket-holder-thickness)]))
+                                    (->> (cube 7 7 choc-socket-holder-height)
+                                         (translate [5 4 (+ hotswap-base-z-offset choc-socket-holder-thickness)])))
         hotswap-holder      (union (if use-choc? choc-hotswap-socket-holder ())
-                                (difference swap-holder 
-                                        main-axis-hole
-                                        (union plus-hole plus-hole-mirrored)
-                                        (union minus-hole minus-hole-mirrored)
-                                        friction-hole-left
-                                        friction-hole-right
-                                        hotswap-base-shape)
-                            )]
+                                   (difference swap-holder
+                                               main-axis-hole
+                                               (union plus-hole plus-hole-mirrored)
+                                               (union minus-hole minus-hole-mirrored)
+                                               friction-hole-left
+                                               friction-hole-right
+                                               hotswap-base-shape))]
     (difference (union plate-half
                        (->> plate-half
                             (mirror [1 0 0])
@@ -457,14 +455,20 @@
    (* dy (+ wall-xy-offset wall-thickness))
    wall-z-offset])
 ;; connectors
-(def rj9-cube
-  (cube 14.78 13 22.38))
+; (def rj9-cube (cube 14.78 13 22.38))
+;; Measured size is (def rj9-cube (cube 12.75 14.05 17)). But adding some slack
+(def rj9-hole-wall-thickness 1.5)
+(def rj9-hole-wall-modifier (* rj9-hole-wall-thickness 2)) ; times 2 because it's on both sides of each dimension
+(def rj9-hole [13.90 14.75 22])
+(def rj9-hole-cube (cube (first rj9-hole) (second rj9-hole) (last rj9-hole)))
+(def rj9-wire-hole [(first rj9-hole) (second rj9-hole) (/ (last rj9-hole) 2.6)])
+(def rj9-cube (cube (+ (first rj9-hole) rj9-hole-wall-modifier) (+ (second rj9-hole) rj9-hole-wall-modifier) (+ (last rj9-hole) rj9-hole-wall-modifier)))
 (defn rj9-position
   "determines the position of the rj9 housing.
   it takes a function that generates the coordinate of the housing
   and the configuration."
   [frj9-start c]
-  [(first (frj9-start c)) (second (frj9-start c)) 11])
+  [(first (frj9-start c)) (second (frj9-start c)) (+ 11 rj9-hole-wall-thickness)])
 (defn rj9-space
   "puts the space of the rj9 housing based on function and configuration
   that is provided."
@@ -476,27 +480,32 @@
   (translate
    (rj9-position frj9-start c)
    (difference rj9-cube
-               (union (translate [0 2 0] (cube 10.78  9 18.38))
-                      (translate [0 0 5] (cube 10.78 13  5))))))
+               (union
+                (cube (first rj9-hole) (second rj9-hole) (last rj9-hole))
+                (translate [0 (+ rj9-hole-wall-thickness 0) 0] rj9-hole-cube)
+                (translate [0 (- 0 rj9-hole-wall-thickness) (- (/ (last rj9-hole) 2) (/ (last rj9-wire-hole) 2))]
+                           (cube (first rj9-wire-hole) (second rj9-wire-hole) (last rj9-wire-hole)))))))
 
-(def usb-holder-size [6.5 13.0 13.6])
-(def usb-holder-thickness 4)
+; (def usb-holder-size [12.5 13.0 17.6])
+(def usb-holder-size [11.5 13.0 8.0])
+(def usb-holder-thickness 2)
+(def usb-holder-offset [7 4 0])
 (defn usb-holder
   "TODO: doc"
   [fusb-holder-position c]
   (->> (cube (+ (first usb-holder-size) usb-holder-thickness)
              (second usb-holder-size)
              (+ (last usb-holder-size) usb-holder-thickness))
-       (translate [(first (fusb-holder-position c))
-                   (second (fusb-holder-position c))
-                   (/ (+ (last usb-holder-size) usb-holder-thickness) 2)])))
+       (translate [(+ (first (fusb-holder-position c)) (first usb-holder-offset))
+                   (+ (second (fusb-holder-position c)) (second usb-holder-offset))
+                   (+ (/ (+ (last usb-holder-size) usb-holder-thickness) 2) (last usb-holder-offset))])))
 (defn usb-holder-hole
   "TODO: doc"
   [fusb-holder-position c]
   (->> (apply cube usb-holder-size)
-       (translate [(first (fusb-holder-position c))
-                   (second (fusb-holder-position c))
-                   (/ (+ (last usb-holder-size) usb-holder-thickness) 2)])))
+       (translate [(+ (first (fusb-holder-position c)) (first usb-holder-offset))
+                   (+ (second (fusb-holder-position c)) (second usb-holder-offset))
+                   (+ (/ (+ (last usb-holder-size) usb-holder-thickness) 2) (last usb-holder-offset))])))
 
 (defn screw-insert-shape [bottom-radius top-radius height]
   (union (cylinder [bottom-radius top-radius] height)

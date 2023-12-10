@@ -367,7 +367,7 @@
                                (thumb-place c 0  0 (thumb-bl 1))
                                (thumb-place c 1  0 (thumb-br 1))))
        (triangle-hulls #_(thumb-place c 1 -1/2 (thumb-tl 2))
-                       (thumb-place c 0 -1/2 (thumb-bl 2))
+        (thumb-place c 0 -1/2 (thumb-bl 2))
                        (thumb-place c 1 -1/2 (thumb-br 2))
                        (thumb-place c 0 -1/2 (thumb-tl 2))
                        (thumb-place c 1 -1/2 (thumb-tr 2))
