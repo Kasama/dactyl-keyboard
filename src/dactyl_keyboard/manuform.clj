@@ -1356,7 +1356,7 @@
 (defn frj9-start [c]
   (let [x-position (case (get c :configuration-inner-column)
                      :outie 0
-                     :normie 0.1
+                     :normie 1.1
                      :innie 1)
         wall-thickness (get c :configuration-wall-thickness)]
     (key-position c x-position 0 (map + (wall-locate2 wall-thickness 0 1) [0 (/ mount-height  2) 0]))))
@@ -1510,7 +1510,7 @@
 (defn external-holder-space [c]
   (translate (map + (external-holder-position c) [-1.5 (* -1 wall-thickness) 3]) external-holder-cube))
 
-(defn screw-placement [c bottom-radius top-radius height]
+(defn screw-placement [c bottom-radius top-radius height type]
   (let [use-wide-pinky? (get c :configuration-use-wide-pinky?)
         inner           (get c :configuration-inner-column)
         first-screw-x   (case inner
@@ -1530,11 +1530,11 @@
         var-middle-last (if is-three-mini? -0.3 (if is-five? -0 0.2))
         y-middle-last   (+ lastrow var-middle-last)
         x-middle-last   (if is-five? 1.6 2)]
-    (union (screw-insert c first-screw-x  0               bottom-radius top-radius height)
-           (screw-insert c second-screw-x (- lastrow 0.8) bottom-radius top-radius height)
-           (screw-insert c x-middle-last  y-middle-last   bottom-radius top-radius height)
-           (screw-insert c 3              0               bottom-radius top-radius height)
-           (screw-insert c lastloc        1               bottom-radius top-radius height))))
+    (union (screw-insert c first-screw-x  0               bottom-radius top-radius height type)
+           (screw-insert c second-screw-x (- lastrow 0.8) bottom-radius top-radius height type)
+           (screw-insert c x-middle-last  y-middle-last   bottom-radius top-radius height type)
+           (screw-insert c 3              0               bottom-radius top-radius height type)
+           (screw-insert c lastloc        1               bottom-radius top-radius height type))))
 
 (def wire-post-height 7)
 (def wire-post-overhang 3.5)

@@ -1035,7 +1035,7 @@
       (->> (screw-insert-shape bottom-radius top-radius height)
            (translate [(first position) (second position) (/ height 2)]))))
 
-(defn screw-placement [c bottom-radius top-radius height]
+(defn screw-placement [c bottom-radius top-radius height type]
   (let [lastrow           (if (get c :configuration-use-lastrow?) 3.99 3.55)
         toprow            (if (get c :configuration-use-numrow?) -0.12 0.8)
         ncols             (get c :configuration-ncols)
@@ -1057,11 +1057,11 @@
                             5 3
                             6 3
                             3)]
-    (union (screw-insert c -1.5      4.9       bottom-radius top-radius height)
-           (screw-insert c 2         toprow    bottom-radius top-radius height)
-           (screw-insert c -0.75     2         bottom-radius top-radius height)
-           (screw-insert c middlerow lastrow   bottom-radius top-radius height)
-           (screw-insert c lastcol   lastrow   bottom-radius top-radius height))))
+    (union (screw-insert c -1.5      4.9       bottom-radius top-radius height type)
+           (screw-insert c 2         toprow    bottom-radius top-radius height type)
+           (screw-insert c -0.75     2         bottom-radius top-radius height type)
+           (screw-insert c middlerow lastrow   bottom-radius top-radius height type)
+           (screw-insert c lastcol   lastrow   bottom-radius top-radius height type))))
 
 (defn new-case [c]
   (union (front-wall c)

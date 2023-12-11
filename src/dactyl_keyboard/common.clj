@@ -459,7 +459,7 @@
 ;; Measured size is (def rj9-cube (cube 12.75 14.05 17)). But adding some slack
 (def rj9-hole-wall-thickness 1.5)
 (def rj9-hole-wall-modifier (* rj9-hole-wall-thickness 2)) ; times 2 because it's on both sides of each dimension
-(def rj9-hole [13.90 14.75 22])
+(def rj9-hole [13.90 12.75 22])
 (def rj9-hole-cube (cube (first rj9-hole) (second rj9-hole) (last rj9-hole)))
 (def rj9-wire-hole [(first rj9-hole) (second rj9-hole) (/ (last rj9-hole) 2.6)])
 (def rj9-cube (cube (+ (first rj9-hole) rj9-hole-wall-modifier) (+ (second rj9-hole) rj9-hole-wall-modifier) (+ (last rj9-hole) rj9-hole-wall-modifier)))
@@ -487,9 +487,9 @@
                            (cube (first rj9-wire-hole) (second rj9-wire-hole) (last rj9-wire-hole)))))))
 
 ; (def usb-holder-size [12.5 13.0 17.6])
-(def usb-holder-size [11.5 13.0 8.0])
+(def usb-holder-size [12.5 13.0 8.0])
 (def usb-holder-thickness 2)
-(def usb-holder-offset [7 4 0])
+(def usb-holder-offset [-17 2.4 0])
 (defn usb-holder
   "TODO: doc"
   [fusb-holder-position c]
@@ -511,9 +511,12 @@
   (union (cylinder [bottom-radius top-radius] height)
          (translate [0 0 (/ height 2)] (sphere top-radius))))
 
-(def screw-insert-height 3.8)
-(def screw-insert-bottom-radius (/ 5.31 2))
-(def screw-insert-top-radius (/ 5.1 2))
+(def screw-insert-height 6)
+(def screw-insert-bottom-radius (/ 5.55 2))
+(def screw-insert-top-radius (/ 5.55 2))
+; (def screw-insert-height 3.8)
+; (def screw-insert-bottom-radius (/ 5.31 2))
+; (def screw-insert-top-radius (/ 5.1 2))
 
 (defn screw-insert-holes
   "TODO: doc.
@@ -522,7 +525,7 @@
   (placement-function c
                       screw-insert-bottom-radius
                       screw-insert-top-radius
-                      screw-insert-height))
+                      screw-insert-height :inner-hole))
 (defn screw-insert-outers
   "TODO: doc.
    but basically it takes a function that places outer parts of screw holes with the following specs."
@@ -530,13 +533,52 @@
   (placement-function c
                       (+ screw-insert-bottom-radius 1.6)
                       (+ screw-insert-top-radius 1.6)
-                      (+ screw-insert-height 1.5)))
+                      (+ screw-insert-height 1.5)
+                      :outer-hole))
 (defn screw-insert-screw-holes
   "TODO: doc."
   [placement-function c]
-  (placement-function c 1.7 1.7 350))
+  (placement-function c 1.7 1.7 350 :plate-hole))
 
-(defn screw-insert [c column row bottom-radius top-radius height]
+(def hex-screw-slit-length 5.9)
+
+(defn hex-screw-slit
+  [height angle]
+  (let [xy-side hex-screw-slit-length ; height of an M3 hex bolt hexagon
+        side (* xy-side (Math/tan (/ pi 6)))]
+    (translate [0 0 (/ height 2)]
+               (rotate angle [0 0 1]
+                       (cube side xy-side height :center true)))))
+
+(defn hex-bolt-hole-shape
+  "add a screw hole that holds an M3 hex bolt"
+  [bottom-radius top-radius height]
+  (hull
+   (union
+    (hex-screw-slit height 0)
+    (hex-screw-slit height (/ pi 3))
+    (hex-screw-slit height (* 2 (/ pi 3))))
+
+   (translate [0 0 height]
+              (sphere (* hex-screw-slit-length (Math/tan (/ pi 6)))))))
+   ; (translate [0 0 height]
+   ;            (difference
+   ;             (difference
+   ;              (sphere top-radius)
+   ;              (sphere (- top-radius 0.5)))
+   ;             (rotate (/ pi 2) [1 0 0]
+   ;                     (translate [(- top-radius), (- top-radius), 0] (cube (* 2 top-radius) (* 2 top-radius) (* 2 top-radius))))))))
+
+(defn hex-bolt-case-shape
+  "add a bolt hole enclosure"
+  [bottom-radius top-radius height]
+  (union
+   (cylinder [bottom-radius, top-radius] height :center false)
+
+   (translate [0 0 height]
+              (sphere top-radius))))
+
+(defn screw-insert [c column row bottom-radius top-radius height type]
   (let [lastcol     (flastcol (get c :configuration-ncols))
         lastrow     (flastrow (get c :configuration-nrows 5))
         shift-right (= column lastcol)
@@ -551,5 +593,11 @@
                         (if shift-left
                           (map + (left-key-position c row 0) (wall-locate3 wall-thickness -1 0))
                           (key-position c column row (map + (wall-locate2 wall-thickness 1  0) [(/ mount-width 2) 0 0])))))]
-    (->> (screw-insert-shape bottom-radius top-radius height)
-         (translate [(first position) (second position) (/ height 2)]))))
+    (case type
+      :outer-hole (->> (hex-bolt-case-shape bottom-radius top-radius height)
+                       (translate [(first position) (second position) 0]))
+      :inner-hole (->> (hex-bolt-hole-shape bottom-radius top-radius height)
+                       (translate [(first position) (second position) 0]))
+      :plate-hole ())))
+; (->> (screw-insert-shape bottom-radius top-radius height)
+    ;      (translate [(first position) (second position) (/ height 2)]))))
