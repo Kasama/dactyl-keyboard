@@ -224,6 +224,7 @@
         _                                 (spit "things/right.scad"  (g/generate-case-dm c true))
         _                                 (spit "things/left-plate.scad" (g/generate-plate-dm c false))
         _                                 (spit "things/right-plate.scad"  (g/generate-plate-dm c true))
+        _                                 (spit "things/pi-holder.scad"  (g/generate-pi-holder c 3))
         _                                 (spit "things/manuform.json" (json/write-str (g/generate-json-dm c-json is-right?)))]
     {:status  204
      :headers {"Content-Type"        "application/octet-stream"

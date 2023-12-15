@@ -1586,7 +1586,7 @@
               (if-not use-external-holder?
                 (case connector-type
                   :usb (union (pro-micro-holder c)
-                               (trrs-usb-holder-holder c))
+                              (trrs-usb-holder-holder c))
                   :trrs (union (pro-micro-holder c)
                                (trrs-usb-holder-holder c)
                                (trrs-holder c))
@@ -1613,25 +1613,39 @@
 (defn model-left [c]
   (mirror [-1 0 0] (model-right c)))
 
-(defn plate-right [c]
-  (let [use-screw-inserts? (get c :configuration-use-screw-inserts?)
-        screw-outers       (if use-screw-inserts?
-                             (screw-insert-outers screw-placement c)
-                             ())
-        screw-inners       (if use-screw-inserts?
-                             (translate [0 0 -2] (screw-insert-screw-holes screw-placement c))
-                             ())
-        bot                (cut (translate [0 0 -0.1] (union (case-walls c) screw-outers)))
-        inner-thing        (difference (translate [0 0 -0.1] (project (union (extrude-linear {:height 5
-                                                                                              :scale  0.1
-                                                                                              :center true} bot)
-                                                                             (cube 50 50 5))))
-                                       screw-inners)]
-    (difference (extrude-linear {:height 3} inner-thing)
-                screw-inners)))
+(def bottom-plate-thickness 3)
+
+(defn bottom-plate
+  ([c] (bottom-plate c :right))
+  ([c side] (let [use-screw-inserts? (get c :configuration-use-screw-inserts?)
+                  screw-outers       (if use-screw-inserts?
+                                       (screw-insert-outers screw-placement c)
+                                       ())
+                  screw-inners       (if use-screw-inserts?
+                                       (translate [0 0 (- (/ bottom-plate-thickness 2))] (screw-insert-screw-holes screw-placement c bottom-plate-thickness))
+                                       ())
+                  bot                (cut (translate [0 0 -0.1] (union (case-walls c) screw-outers)))
+                  usb-holder-pos (fusb-holder-position c)
+                  rpi-holder         (translate
+                                      [(+ (first usb-holder-offset) (first usb-holder-pos) (- pi-holder-x-hole-distance) (/ (first usb-holder-size) 2))
+                                       (+ (second usb-holder-offset) (second usb-holder-pos) (-  pi-holder-y-hole-distance) (- (/ (second usb-holder-size) 2)) -7.2)
+                                       (- (/ bottom-plate-thickness 2))]
+                                      (rotate (deg2rad 0) [0 1 0] (pi-holder-holder bottom-plate-thickness side)))
+                  inner-thing        (difference (translate [0 0 -0.1] (project (union (extrude-linear {:height 5
+                                                                                                        :scale  0.1
+                                                                                                        :center true} bot)
+                                                                                       (cube 50 50 5))))
+                                                 screw-inners)]
+              (difference
+               (difference (extrude-linear {:height bottom-plate-thickness} inner-thing)
+                           screw-inners)
+               rpi-holder))))
 
 (defn plate-left [c]
-  (mirror [-1 0 0] (plate-right c)))
+  (mirror [-1 0 0] (bottom-plate c :left)))
+
+(defn plate-right [c]
+  (bottom-plate c :right))
 
 (def c {:configuration-nrows                    4
         :configuration-ncols                    5

@@ -535,32 +535,37 @@
                       (+ screw-insert-top-radius 1.6)
                       (+ screw-insert-height 1.5)
                       :outer-hole))
+
 (defn screw-insert-screw-holes
   "TODO: doc."
-  [placement-function c]
-  (placement-function c 1.7 1.7 350 :plate-hole))
+  [placement-function c thickness]
+  (placement-function c 2 3.1 thickness :plate-hole))
 
-(def hex-screw-slit-length 5.9)
+(def m3-hex-screw-slit-length 5.9) ; height of an M3 hex bolt hexagon == 2*apothem
+
+(defn hexagon-side-length [apothem]
+  (* 2 apothem (Math/tan (/ pi 6))))
 
 (defn hex-screw-slit
-  [height angle]
-  (let [xy-side hex-screw-slit-length ; height of an M3 hex bolt hexagon
-        side (* xy-side (Math/tan (/ pi 6)))]
-    (translate [0 0 (/ height 2)]
-               (rotate angle [0 0 1]
-                       (cube side xy-side height :center true)))))
+  [hex-apothem height]
+  (let [side (hexagon-side-length hex-apothem)
+        part (fn [angle]
+               (translate [0 0 (/ height 2)]
+                          (rotate angle [0 0 1]
+                                  (cube side (* hex-apothem 2) height :center true))))]
+    (union
+     (part 0)
+     (part (/ pi 3))
+     (part (* 2 (/ pi 3))))))
 
 (defn hex-bolt-hole-shape
   "add a screw hole that holds an M3 hex bolt"
   [bottom-radius top-radius height]
   (hull
-   (union
-    (hex-screw-slit height 0)
-    (hex-screw-slit height (/ pi 3))
-    (hex-screw-slit height (* 2 (/ pi 3))))
+   (hex-screw-slit (/ m3-hex-screw-slit-length 2) height)
 
    (translate [0 0 height]
-              (sphere (* hex-screw-slit-length (Math/tan (/ pi 6)))))))
+              (sphere (hexagon-side-length (/ m3-hex-screw-slit-length 2))))))
    ; (translate [0 0 height]
    ;            (difference
    ;             (difference
@@ -577,6 +582,11 @@
 
    (translate [0 0 height]
               (sphere top-radius))))
+
+(defn screw-bolt-holder [bottom-radius top-radius height]
+  (binding [*fn* 30] (union
+                      (cylinder bottom-radius height :center false)
+                      (cylinder top-radius (- height 1) :center false))))
 
 (defn screw-insert [c column row bottom-radius top-radius height type]
   (let [lastcol     (flastcol (get c :configuration-ncols))
@@ -598,6 +608,81 @@
                        (translate [(first position) (second position) 0]))
       :inner-hole (->> (hex-bolt-hole-shape bottom-radius top-radius height)
                        (translate [(first position) (second position) 0]))
-      :plate-hole ())))
+      :plate-hole (->> (screw-bolt-holder bottom-radius top-radius height)
+                       (translate [(first position) (second position) 0])))))
 ; (->> (screw-insert-shape bottom-radius top-radius height)
     ;      (translate [(first position) (second position) (/ height 2)]))))
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Raspberry pi holder
+;;;;;;;;;;;;;;;;;;;;;;
+
+(def pi-holder-inner-screw 2.7)
+(def pi-holder-outer-screw 4)
+
+(def pi-holder-x-hole-distance 11.2)
+(def pi-holder-y-hole-distance 46.85)
+
+(defn pi-holder-screw-hole [x, y, z, thickness]
+  (translate [x y z] (union
+                      (extrude-linear {:height thickness :center false}
+                                      (circle (/ pi-holder-inner-screw 2)))
+                      (extrude-linear {:height (- thickness 1) :center false}
+                                      (circle (/ pi-holder-outer-screw 2))))))
+
+; (def pi-holder-reset-x 3)
+; (def pi-holder-reset-y 38.4)
+(def pi-holder-reset-x 2)
+(def pi-holder-reset-y 37.3)
+(defn pi-holder-reset-hole [thickness]
+  (cylinder (/ pi-holder-inner-screw 2) thickness :center false))
+
+(def plate-screw-hole-offset 4.5)
+
+(defn pi-holder-holes [plate-thickness side]
+  (binding [*fn* 30]
+    (union
+     (pi-holder-screw-hole pi-holder-x-hole-distance 0 0 plate-thickness)
+     (pi-holder-screw-hole pi-holder-x-hole-distance pi-holder-y-hole-distance 0 plate-thickness)
+     (pi-holder-screw-hole 0 pi-holder-y-hole-distance 0 plate-thickness)
+     (pi-holder-screw-hole 0 0 0 plate-thickness)
+     (->> (pi-holder-reset-hole plate-thickness)
+          (translate [(case side
+                        :left pi-holder-reset-x
+                        :right (- pi-holder-x-hole-distance pi-holder-reset-x)),
+                      pi-holder-reset-y,
+                      0])))))
+(defn pi-holder-holder-screw-holes [hole]
+  (union
+   (translate [(+ (/ pi-holder-x-hole-distance 2) plate-screw-hole-offset) (/ pi-holder-y-hole-distance 2) 0]
+              hole)
+   (translate [(- (/ pi-holder-x-hole-distance 2) plate-screw-hole-offset) (/ pi-holder-y-hole-distance 2) 0]
+              hole)
+   (translate [(/ pi-holder-x-hole-distance 2) (- (/ pi-holder-y-hole-distance 2) (* plate-screw-hole-offset 2)) 0]
+              hole)))
+
+(defn pi-holder [c, thickness]
+  (let [plate-screw-hole (union
+                          (hex-screw-slit (/ m3-hex-screw-slit-length 2) (- thickness 0.4))
+                          (hex-screw-slit 2 thickness))]
+    (difference
+     (translate [(- pi-holder-outer-screw) (- pi-holder-outer-screw) 0]
+                (cube (+ pi-holder-x-hole-distance (* 2 pi-holder-outer-screw))
+                      (+ pi-holder-y-hole-distance (* 2 pi-holder-outer-screw))
+                      thickness
+                      :center false))
+     (pi-holder-holder-screw-holes plate-screw-hole)
+     (pi-holder-holes thickness :right))))
+
+(defn pi-holder-holder [plate-thickness side]
+  (binding [*fn* 30]
+    (let [hole
+          (screw-insert-screw-holes (fn [_ bottom-radius top-radius height _] (screw-bolt-holder bottom-radius top-radius height)) 0 plate-thickness)]
+      (union
+       (pi-holder-holder-screw-holes hole)
+       (->> (pi-holder-reset-hole plate-thickness)
+            (translate [(case side
+                          :left pi-holder-reset-x
+                          :right (- pi-holder-x-hole-distance pi-holder-reset-x)),
+                        pi-holder-reset-y,
+                        0]))))))

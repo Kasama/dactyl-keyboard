@@ -3,6 +3,7 @@
   (:require [scad-clj.scad :refer :all]
             [scad-clj.model :refer :all]
             [dactyl-keyboard.manuform :as dm]
+            [dactyl-keyboard.common :as common]
             [dactyl-keyboard.lightcycle :as dl]))
 
 (defn generate-case-dl [confs is-right?]
@@ -70,7 +71,7 @@
                  :wire-post        (get confs :configuration-use-wire-post?)
                  :screw-inserts    (get confs :configuration-use-screw-inserts?)}
      :misc      {:keycaps    (get confs :configuration-show-caps?)
-                 :right-side is-right? }}))
+                 :right-side is-right?}}))
 
 (defn generate-json-dl [confs is-right?]
   {:keys      {:columns         (get confs :configuration-ncols)
@@ -114,3 +115,6 @@
   (write-scad (if is-right?
                 (dm/plate-right confs)
                 (dm/plate-left confs))))
+
+(defn generate-pi-holder [confs thickness]
+  (write-scad (common/pi-holder confs thickness)))
